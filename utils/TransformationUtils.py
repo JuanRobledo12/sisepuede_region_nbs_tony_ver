@@ -100,7 +100,7 @@ class ExcelYAMLHandler:
 class StrategyCSVHandler:
     """
     TODO:
-        - The naming of strategy_code and strategy could be done together. Like using the same for both this could also be the suffix so we only pass one parameter instead of three.
+        - better strategy name?
         - Determine the strategy_id based on the type of Strategy (For example: PFLO is 6000+ So we get the highest PFLO and we add one for the new strat)
     """
     def __init__(self, csv_file, yaml_dir_path):
@@ -121,12 +121,21 @@ class StrategyCSVHandler:
             print(f"Error loading CSV file: {e}")
             return None
     
+    def get_strategy_id(self, strategy_group):
+        #TODO:
+        pass
+        
+    def get_strategy_code(self, strategy_group, strategy_name):
+    
+        return f"{strategy_group.upper()}:{strategy_name.upper()}"
+    
+    
     def get_transformation_specification(self, yaml_file_suffix):
-
         # Get a list of all files and directories in the specified directory
         all_entries = os.listdir(self.yaml_dir_path)
         strategy_transformation_yamls = [file for file in all_entries if file.endswith(f'{yaml_file_suffix}.yaml')]
-        transformation_specification = ''
+        transformation_codes = []
+        
         for yaml_file in strategy_transformation_yamls:
             yaml_path = os.path.join(self.yaml_dir_path, yaml_file)
             # Open the yaml file
@@ -134,17 +143,19 @@ class StrategyCSVHandler:
                 yaml_content = yaml.safe_load(file)
 
             transformation_code = yaml_content['identifiers']['transformation_code']
-            transformation_specification = transformation_specification + f'{transformation_code}|'
+            transformation_codes.append(transformation_code)
+        
+        # Join transformation codes with a pipe symbol, excluding the trailing one
+        transformation_specification = '|'.join(transformation_codes)
         return transformation_specification
 
-    
-    def add_row(self, strategy_id, strategy_code, strategy, description, yaml_file_suffix):
+    def add_row(self, strategy_id, strategy_group, description, yaml_file_suffix):
 
         # Create a new row as a dictionary
         new_row = {
             'strategy_id': str(strategy_id),
-            'strategy_code': strategy_code,
-            'strategy': strategy,
+            'strategy_code': self.get_strategy_code(strategy_group, yaml_file_suffix),
+            'strategy': yaml_file_suffix, #TODO: Maybe change this
             'description': description,
             'transformation_specification': self.get_transformation_specification(yaml_file_suffix)
         }
