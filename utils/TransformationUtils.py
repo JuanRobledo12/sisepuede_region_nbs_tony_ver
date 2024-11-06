@@ -97,7 +97,71 @@ class ExcelYAMLHandler:
                 except Exception as e:
                     print(f"Error processing file {yaml_name} for column {column}: {e}")
 
-class StrategyUpdater:
+class StrategyCSVHandler:
+    """
+    TODO:
+        - The naming of strategy_code and strategy could be done together. Like using the same for both this could also be the suffix so we only pass one parameter instead of three.
+        - Determine the strategy_id based on the type of Strategy (For example: PFLO is 6000+ So we get the highest PFLO and we add one for the new strat)
+    """
+    def __init__(self, csv_file, yaml_dir_path):
+        self.csv_file = csv_file
+        self.data = self.load_csv()
+        self.yaml_dir_path = yaml_dir_path
+    
+    def load_csv(self):
+        # Load the CSV file into a DataFrame
+        try:
+            df = pd.read_csv(self.csv_file)
+            return df
+        except FileNotFoundError:
+            print(f"{self.csv_file} not found. Creating a new DataFrame.")
+            columns = ['strategy_id', 'strategy_code', 'strategy', 'description', 'transformation_specification']
+            return pd.DataFrame(columns=columns)
+        except Exception as e:
+            print(f"Error loading CSV file: {e}")
+            return None
+    
+    def get_transformation_specification(self, yaml_file_suffix):
 
-    def __init__(self, yaml_dir):
-        pass
+        # Get a list of all files and directories in the specified directory
+        all_entries = os.listdir(self.yaml_dir_path)
+        strategy_transformation_yamls = [file for file in all_entries if file.endswith(f'{yaml_file_suffix}.yaml')]
+        transformation_specification = ''
+        for yaml_file in strategy_transformation_yamls:
+            yaml_path = os.path.join(self.yaml_dir_path, yaml_file)
+            # Open the yaml file
+            with open(yaml_path, 'r') as file:
+                yaml_content = yaml.safe_load(file)
+
+            transformation_code = yaml_content['identifiers']['transformation_code']
+            transformation_specification = transformation_specification + f'{transformation_code}|'
+        return transformation_specification
+
+    
+    def add_row(self, strategy_id, strategy_code, strategy, description, yaml_file_suffix):
+
+        # Create a new row as a dictionary
+        new_row = {
+            'strategy_id': str(strategy_id),
+            'strategy_code': strategy_code,
+            'strategy': strategy,
+            'description': description,
+            'transformation_specification': self.get_transformation_specification(yaml_file_suffix)
+        }
+        
+        # Append the new row to the DataFrame
+        self.data = pd.concat([self.data, pd.DataFrame([new_row])], ignore_index=True)
+        print(f"Added new row: {new_row}")
+    
+    def save_csv(self):
+        # Save the DataFrame back to the CSV file
+        try:
+            self.data.to_csv(self.csv_file, index=False)
+            print(f"Data saved to {self.csv_file}")
+        except Exception as e:
+            print(f"Error saving CSV file: {e}")
+
+# # Example usage:
+# csv_handler = StrategyCSVHandler('strategies.csv', 'transformations')
+# csv_handler.add_row(7000, 'NEW:STRATEGY', 'New Strategy', 'A description for new strategy', 'strategy_x')
+# csv_handler.save_csv()
