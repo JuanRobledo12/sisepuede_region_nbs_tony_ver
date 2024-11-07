@@ -7,6 +7,11 @@ Repository storing notebooks with region-specific information
 2. For a walkthrough on running a simulation and generating new YAML files and strategies, please refer to the [croatia_manager_wb.ipynb](croatia/croatia_manager_wb.ipynb) notebook.
 
 ## TODO
+
+### `manager_wb`
+- Add a variable called region to the top cell so everytime you want to run a different country you just change this variable.
+- Standarize file names so the change suggested above makes sense.
+
 ### `ExcelYAMLHandler`
 
 - The special cases (transformations without a single magnitude paramater) are not yet handled; we also need to multiply them by the scalar.
