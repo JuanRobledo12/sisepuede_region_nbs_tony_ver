@@ -8,9 +8,6 @@ Repository storing notebooks with region-specific information
 
 ## TODO
 
-### `manager_wb`
-- Add a variable called region to the top cell so everytime you want to run a different country you just change this variable.
-- Standarize file names so the change suggested above makes sense.
 
 ### `ExcelYAMLHandler`
 
@@ -22,3 +19,5 @@ Repository storing notebooks with region-specific information
 
 ### `StrategyCSVHandler`
 - Come up with a better naming or a more standarize format for strategies.
+
+

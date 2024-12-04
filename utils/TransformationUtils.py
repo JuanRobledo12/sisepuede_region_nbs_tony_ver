@@ -183,7 +183,7 @@ class StrategyCSVHandler:
         transformation_specification = '|'.join(transformation_codes)
         return transformation_specification
 
-    def add_row(self, strategy_group, description, yaml_file_suffix, custom_id=None):
+    def add_strategy(self, strategy_group, description, yaml_file_suffix, custom_id=None):
         # Check if a custom ID was provided
         if custom_id is not None:
             if custom_id in self.data['strategy_id'].values:
