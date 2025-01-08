@@ -196,7 +196,7 @@ class StrategyCSVHandler:
         # Generate the strategy_code and check for uniqueness
         strategy_code = self.get_strategy_code(strategy_group, yaml_file_suffix)
         if strategy_code in self.data['strategy_code'].values:
-            print(f"Error: strategy_code {strategy_code} already exists. Please use a different code or modify the existing one.")
+            print(f"Error: strategy_code {strategy_code} already exists. Please use a different code or eliminate the existing one.")
             return
 
         new_row = {
