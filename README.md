@@ -8,6 +8,8 @@ Repository storing notebooks with region-specific information
 
 ## TODO
 
+### File Structure
+- Create a folder for the excel files and a folder for the input data files under the data directory. Make sure to update the paths on the notebook and classes
 
 ### `ExcelYAMLHandler`
 

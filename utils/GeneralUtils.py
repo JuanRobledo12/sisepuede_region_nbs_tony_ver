@@ -125,9 +125,13 @@ class GeneralUtils:
         Returns:
         pd.DataFrame: The updated DataFrame (df2) with the missing columns added.
         """
-
         # Identify columns in df1 but not in df2
         columns_to_add = [col for col in df1.columns if col not in df2.columns]
+
+        # Check if there are any columns to add
+        if not columns_to_add:
+            print("No missing columns to add.")
+            return df2
 
         # Add missing columns to df2 with their values from df1
         for col in columns_to_add:
