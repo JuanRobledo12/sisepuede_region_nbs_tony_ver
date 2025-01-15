@@ -110,8 +110,8 @@ class GeneralUtils:
         # Columns present in df2 but not in df1
         diff_in_df2 = columns_df2 - columns_df1
 
-        print("Columns in df1 but not in df2:", diff_in_df1)
-        print("Columns in df2 but not in df1:", diff_in_df2)
+        print("Columns in df1(example) but not in df2(yours):", diff_in_df1)
+        print("Columns in df2(yours) but not in df1(example):", diff_in_df2)
 
     def add_missing_cols(self, df1, df2):
         """
