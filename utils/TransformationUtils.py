@@ -42,6 +42,21 @@ class ExcelYAMLHandler:
         with open(new_yaml_path, 'w') as new_file:
             yaml.dump(yaml_content, new_file)
     
+    def get_transformations_per_strategy_dict(self):
+
+        transformations_per_strategy = {}
+        strategy_names =  self.get_strategy_cols()
+        df = self.load_excel_data()
+        for strategy in strategy_names:
+            subset_df = df[['transformation_code', strategy]]
+            subset_df = subset_df.dropna()
+            subset_transformation_codes = subset_df['transformation_code'].tolist()
+            subset_transformation_codes = [f"{code}_{strategy.upper()}" for code in subset_transformation_codes]
+            transformations_per_strategy[strategy] = subset_transformation_codes
+        return transformations_per_strategy
+
+
+    
     def process_yaml_files(self):
         # Ensure that the data was loaded successfully
         if self.data is None:
@@ -103,12 +118,13 @@ class StrategyCSVHandler:
     TODO:
         - better strategy name?
     """
-    def __init__(self, csv_file, yaml_dir_path, yaml_mapping_file):
+    def __init__(self, csv_file, yaml_dir_path, yaml_mapping_file, transformation_per_strategy_dict):
         self.csv_file = csv_file
         self.data = self.load_csv()
         self.yaml_dir_path = yaml_dir_path
         self.yaml_mapping_file = yaml_mapping_file
         self.mapping = self.load_yaml_mapping()
+        self.transformations_per_strategy_dict = transformation_per_strategy_dict
     
     def load_csv(self):
         try:
@@ -165,6 +181,7 @@ class StrategyCSVHandler:
         return f"{strategy_group.upper()}:{strategy_name.upper()}"
     
     def get_transformation_specification(self, yaml_file_suffix):
+        # TODO we need to change this
         # Get a list of all files and directories in the specified directory
         all_entries = os.listdir(self.yaml_dir_path)
         strategy_transformation_yamls = [file for file in all_entries if file.endswith(f'{yaml_file_suffix}.yaml')]
@@ -179,8 +196,13 @@ class StrategyCSVHandler:
             transformation_code = yaml_content['identifiers']['transformation_code']
             transformation_codes.append(transformation_code)
         
+        # Filter the transformation_codes to only include the ones that are used in the strategy
+        transformation_codes_filtered = [
+            code for code in transformation_codes 
+            if code in self.transformations_per_strategy_dict.get(f'strategy_{yaml_file_suffix}', [])
+        ]
         # Join transformation codes with a pipe symbol, excluding the trailing one
-        transformation_specification = '|'.join(transformation_codes)
+        transformation_specification = '|'.join(transformation_codes_filtered)
         return transformation_specification
 
     def add_strategy(self, strategy_group, description, yaml_file_suffix, custom_id=None):
