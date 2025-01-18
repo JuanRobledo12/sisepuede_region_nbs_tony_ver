@@ -8,7 +8,10 @@ identifiers:
   transformation_name: 'Scaled Default Max Parameters by 0.6 - LSMM: Improve manure
     management for cattle and pigs'
 parameters:
-  dict_lsmm_pathways: null
+  dict_lsmm_pathways:
+    "anaerobic_digester": 0.9
+    "composting": 0.15
+    "daily_spread": 0.05
   vec_cats_lvst: null
   vec_implementation_ramp: null
 transformer: TFR:LSMM:INC_MANAGEMENT_CATTLE_PIGS
