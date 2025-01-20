@@ -100,7 +100,7 @@ class ExcelYAMLHandler:
 
 
     
-    def process_yaml_files(self):
+    def process_yaml_files(self, overwrite_mult_param_transformations=True):
         """
         Processes YAML files based on the data loaded into the instance.
         This method iterates over each row in the DataFrame stored in `self.data`, 
@@ -164,9 +164,13 @@ class ExcelYAMLHandler:
                     if 'parameters' in yaml_content:
                         parameters = yaml_content['parameters']
                         if 'magnitude' not in parameters:
-                            print(f"YAML file {yaml_name} for strategy {column} set to default because it does not have magnitude attribute")
-                            self.save_yaml_file(yaml_content, yaml_name, column, transformation_code, subsector, transformation_name, scalar_val)
-                            continue
+                            if overwrite_mult_param_transformations:
+                                print(f"YAML file {yaml_name} for strategy {column} set to default because it does not have magnitude attribute")
+                                self.save_yaml_file(yaml_content, yaml_name, column, transformation_code, subsector, transformation_name, scalar_val)
+                                continue
+                            else:
+                                print(f"YAML file {yaml_name} for strategy {column} wasn't updated. Please check it manually.")
+                                continue
                     else:
                         print(f"YAML file {yaml_name} for strategy {column} set to default because it does not have parameters attribute")
                         self.save_yaml_file(yaml_content, yaml_name, column, transformation_code, subsector, transformation_name, scalar_val)
