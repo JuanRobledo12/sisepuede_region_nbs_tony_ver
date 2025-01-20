@@ -166,3 +166,6 @@ cython_debug/
 #.idea/
 
 *Zone.Identifier
+
+# ignore .mps files
+*.mps
