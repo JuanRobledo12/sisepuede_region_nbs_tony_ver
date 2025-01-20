@@ -2,14 +2,6 @@ import os
 import pandas as pd
 import yaml
 
-"""
-TODO:
-    - The special cases aren't handled yet. We need to also multiply them by the scalar.
-    - We need to scale the default values to its max default.
-    - We need to also edit the yaml description.
-    - We need to come upt with a better transformation name yaml parameter.
-    - If several strategies have the same magnitude in a transformation then we should only make una transformation file instead of three
-"""
 
 class ExcelYAMLHandler:
     def __init__(self, excel_file, yaml_directory, sheet_name='yaml'):
@@ -19,6 +11,21 @@ class ExcelYAMLHandler:
         self.data = self.load_excel_data()
     
     def load_excel_data(self):
+        """
+        Load the Excel sheet into a DataFrame.
+
+        This method attempts to read an Excel file specified by the instance's
+        `excel_file` attribute and load the data from the sheet specified by the
+        `sheet_name` attribute into a pandas DataFrame.
+
+        Returns:
+            pd.DataFrame: A DataFrame containing the data from the specified Excel sheet.
+            None: If there is an error loading the Excel file, None is returned.
+
+        Raises:
+            Exception: If there is an error loading the Excel file, an exception is caught
+                       and an error message is printed.
+        """
         # Load the Excel sheet into a DataFrame
         try:
             df = pd.read_excel(self.excel_file, sheet_name=self.sheet_name)
@@ -28,6 +35,13 @@ class ExcelYAMLHandler:
             return None
     
     def get_strategy_cols(self):
+        """
+        Retrieve column names that start with 'strategy'.
+        This method filters the columns of the DataFrame stored in the `data` attribute
+        and returns a list of column names that begin with the prefix 'strategy'.
+        Returns:
+            list: A list of column names that start with 'strategy'.
+        """
         # Get col names
         col_names = self.data.columns
        
@@ -35,6 +49,21 @@ class ExcelYAMLHandler:
         return [col for col in col_names if col.startswith('strategy')]
     
     def save_yaml_file(self, yaml_content, yaml_name, column, transformation_code, subsector, transformation_name, scalar_val):
+        """
+        Save the given YAML content to a file with a modified name and updated identifiers.
+
+        Args:
+            yaml_content (dict): The content to be saved in the YAML file.
+            yaml_name (str): The original name of the YAML file.
+            column (str): The column name to be included in the transformation code and new file name.
+            transformation_code (str): The transformation code to be included in the identifiers.
+            subsector (str): The subsector to be included in the transformation name.
+            transformation_name (str): The transformation name to be included in the identifiers.
+            scalar_val (float): The scalar value to be included in the transformation name.
+
+        Returns:
+            None
+        """
         yaml_content['identifiers']['transformation_code'] = f'{transformation_code}_{column.upper()}'
         yaml_content['identifiers']['transformation_name'] = f'Scaled Default Max Parameters by {scalar_val} - {subsector}: {transformation_name}' # TODO Change this format
         new_yaml_name = f"{os.path.splitext(yaml_name)[0]}_{column}.yaml"
@@ -43,6 +72,20 @@ class ExcelYAMLHandler:
             yaml.dump(yaml_content, new_file)
     
     def get_transformations_per_strategy_dict(self):
+        """
+        Generates a dictionary of transformation codes for each strategy.
+
+        This method retrieves strategy names and loads data from an Excel file.
+        For each strategy, it creates a subset of the data containing transformation
+        codes and the strategy column, removes rows with missing values, and formats
+        the transformation codes by appending the strategy name in uppercase.
+        The result is a dictionary where each key is a strategy name and the value
+        is a list of formatted transformation codes.
+
+        Returns:
+            dict: A dictionary where keys are strategy names and values are lists
+                  of formatted transformation codes.
+        """
 
         transformations_per_strategy = {}
         strategy_names =  self.get_strategy_cols()
@@ -58,6 +101,31 @@ class ExcelYAMLHandler:
 
     
     def process_yaml_files(self):
+        """
+        Processes YAML files based on the data loaded into the instance.
+        This method iterates over each row in the DataFrame stored in `self.data`, 
+        retrieves the corresponding YAML file, and updates its 'magnitude' parameter 
+        based on the scalar values provided in the DataFrame. The updated YAML files 
+        are then saved to the specified directory.
+        The method performs the following steps:
+        1. Checks if data is loaded; if not, prints a message and returns.
+        2. Iterates over each row in the DataFrame.
+        3. Constructs the path to the YAML file using the 'transformation_yaml_name' column.
+        4. Checks if the YAML file exists; if not, prints a message and continues to the next row.
+        5. For each relevant column (excluding 'transformation_yaml_name' and 'transformation_code'):
+            a. Retrieves the scalar value from the DataFrame.
+            b. Skips processing if the scalar value is NaN.
+            c. Loads the YAML file.
+            d. Checks for the presence of 'parameters' and 'magnitude' attributes.
+            e. Updates the 'magnitude' attribute by multiplying it with the scalar value.
+            f. Saves the modified YAML file.
+        6. Handles exceptions and prints error messages if any issues occur during processing.
+        Raises:
+            Exception: If an error occurs while processing a YAML file.
+        Note:
+            This method assumes that the DataFrame `self.data` and the directory 
+            `self.yaml_directory` are already set up in the instance.
+        """
         # Ensure that the data was loaded successfully
         if self.data is None:
             print("No data available to process.")
@@ -114,10 +182,6 @@ class ExcelYAMLHandler:
                     print(f"Error processing file {yaml_name} for column {column}: {e}")
 
 class StrategyCSVHandler:
-    """
-    TODO:
-        - better strategy name?
-    """
     def __init__(self, csv_file, yaml_dir_path, yaml_mapping_file, transformation_per_strategy_dict):
         self.csv_file = csv_file
         self.data = self.load_csv()
@@ -127,6 +191,16 @@ class StrategyCSVHandler:
         self.transformations_per_strategy_dict = transformation_per_strategy_dict
     
     def load_csv(self):
+        """
+        Loads a CSV file into a pandas DataFrame. If the file is not found, it creates an empty DataFrame with predefined columns.
+        
+        Returns:
+            pd.DataFrame: DataFrame containing the CSV data or an empty DataFrame if the file is not found.
+        
+        Raises:
+            FileNotFoundError: If the CSV file is not found.
+            Exception: For any other exceptions that occur during the loading of the CSV file.
+        """
         try:
             df = pd.read_csv(self.csv_file)
             # Convert 'strategy_id' to integers, handle any non-integer values
@@ -143,6 +217,19 @@ class StrategyCSVHandler:
 
         
     def load_yaml_mapping(self):
+        """
+        Load the YAML mapping file and return the 'strategy_groups' section.
+
+        This method attempts to open and read a YAML file specified by 
+        `self.yaml_mapping_file`. If successful, it returns the 'strategy_groups' 
+        section of the YAML file as a dictionary. If the file is not found or 
+        another error occurs during the loading process, it prints an error 
+        message and returns an empty dictionary.
+
+        Returns:
+            dict: The 'strategy_groups' section of the YAML file if successful, 
+                  otherwise an empty dictionary.
+        """
         try:
             with open(self.yaml_mapping_file, 'r') as file:
                 mapping = yaml.safe_load(file)
@@ -155,6 +242,22 @@ class StrategyCSVHandler:
             return {}
     
     def get_strategy_id(self, strategy_group):
+        """
+        Retrieve the next available strategy ID for a given strategy group.
+
+        This method checks the existing strategy IDs for the specified strategy group
+        and returns the next available ID within the defined range. If the strategy group
+        is not recognized or the ID range is exceeded, a ValueError is raised.
+
+        Parameters:
+        strategy_group (str): The strategy group for which to retrieve the next ID.
+
+        Returns:
+        int: The next available strategy ID.
+
+        Raises:
+        ValueError: If the strategy group is unknown or the ID range is exceeded.
+        """
         if strategy_group not in self.mapping:
             raise ValueError(f"Unknown strategy group: {strategy_group}")
 
@@ -177,12 +280,30 @@ class StrategyCSVHandler:
         return next_id
     
     def get_strategy_code(self, strategy_group, strategy_name):
+        """
+        Generates a strategy code by combining the strategy group and strategy name.
+        Args:
+            strategy_group (str): The group to which the strategy belongs.
+            strategy_name (str): The name of the strategy.
+        Returns:
+            str: A string in the format "STRATEGY_GROUP:STRATEGY_NAME" where both parts are in uppercase.
+        """
     
         return f"{strategy_group.upper()}:{strategy_name.upper()}"
     
     def get_transformation_specification(self, yaml_file_suffix):
-        # TODO we need to change this
-        # Get a list of all files and directories in the specified directory
+        """
+        Retrieves the transformation specification for a given strategy based on the provided YAML file suffix.
+        This method searches for YAML files in the specified directory that match the given suffix,
+        extracts transformation codes from these files, and filters them based on the strategy's
+        transformation dictionary. The resulting transformation codes are concatenated into a single
+        string separated by pipe symbols.
+        Args:
+            yaml_file_suffix (str): The suffix of the YAML files to search for.
+        Returns:
+            str: A string containing the filtered transformation codes separated by pipe symbols.
+        """
+       
         all_entries = os.listdir(self.yaml_dir_path)
         strategy_transformation_yamls = [file for file in all_entries if file.endswith(f'{yaml_file_suffix}.yaml')]
         transformation_codes = []
@@ -205,7 +326,47 @@ class StrategyCSVHandler:
         transformation_specification = '|'.join(transformation_codes_filtered)
         return transformation_specification
 
-    def add_strategy(self, strategy_group, description, yaml_file_suffix, custom_id=None):
+    def add_strategy(self, strategy_group, description, yaml_file_suffix, custom_id=None, update_flag=False):
+        """
+        Add or update a strategy in the dataset.
+        Parameters:
+        strategy_group (str): The group to which the strategy belongs.
+        description (str): A description of the strategy.
+        yaml_file_suffix (str): The suffix of the YAML file associated with the strategy.
+        custom_id (int, optional): A custom ID for the strategy. Required if update_flag is True. Defaults to None.
+        update_flag (bool, optional): Flag indicating whether to update an existing strategy. Defaults to False.
+        Returns:
+        None
+        Raises:
+        ValueError: If update_flag is True and custom_id is not provided.
+        ValueError: If update_flag is True and custom_id does not exist in the dataset.
+        ValueError: If custom_id is provided and already exists in the dataset.
+        ValueError: If the generated strategy_code already exists in the dataset.
+        """
+        # Reload the data to ensure we have the latest version
+        self.data = self.load_csv()
+
+        # If update_flag is true then we update the current strategy
+        if update_flag:
+            # Check if custom_id is provided
+            if custom_id is None:
+                print("Error: custom_id is required for updating a strategy.")
+                return
+            # Check if the custom_id exists
+            if custom_id not in self.data['strategy_id'].values:
+                print(f"Error: strategy_id {custom_id} does not exist. Please provide a valid ID.")
+                return
+            
+            # Get the index of the row to update
+            idx = self.data.index[self.data['strategy_id'] == custom_id].tolist()[0]
+
+            # Update the transformation_specification
+            self.data.at[idx, 'transformation_specification'] = self.get_transformation_specification(yaml_file_suffix)
+
+            self.save_csv()
+            print(f"Updated row with strategy_id {custom_id}")
+            return
+        
         # Check if a custom ID was provided
         if custom_id is not None:
             if custom_id in self.data['strategy_id'].values:
@@ -230,7 +391,10 @@ class StrategyCSVHandler:
         }
 
         self.data = pd.concat([self.data, pd.DataFrame([new_row])], ignore_index=True)
-        print(f"Added new row: {new_row}")
+        self.save_csv()
+        print(f"Updated file with new row: {new_row}")
+      
+
 
     
     def save_csv(self):
