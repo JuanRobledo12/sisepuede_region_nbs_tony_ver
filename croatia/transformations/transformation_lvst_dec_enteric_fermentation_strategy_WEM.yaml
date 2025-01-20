@@ -6,10 +6,10 @@ identifiers:
     fermentation'
 parameters:
   dict_lvst_reductions:
-    "buffalo": 0.5
-    "cattle_dairy": 0.5
-    "cattle_nondairy": 0.5
-    "goats": 0.5
-    "sheep": 0.5
+    buffalo: 0.5
+    cattle_dairy: 0.5
+    cattle_nondairy: 0.5
+    goats: 0.5
+    sheep: 0.5
   vec_implementation_ramp: null
 transformer: TFR:LVST:DEC_ENTERIC_FERMENTATION
