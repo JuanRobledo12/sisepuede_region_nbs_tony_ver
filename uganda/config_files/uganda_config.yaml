@@ -1,0 +1,3 @@
+country_name: "uganda"
+ssp_input_file_name: "sisepuede_inputs_uganda.csv"
+ssp_transformation_cw: "ssp_uganda_transformation_cw.xlsx"

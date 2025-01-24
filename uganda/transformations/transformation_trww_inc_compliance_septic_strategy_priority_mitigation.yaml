@@ -1,0 +1,10 @@
+citations: null
+description: None
+identifiers:
+  transformation_code: TX:TRWW:INC_COMPLIANCE_SEPTIC_STRATEGY_PRIORITY_MITIGATION
+  transformation_name: 'Scaled Default Max Parameters by 0.4 - TRWW: Increase septic
+    compliance'
+parameters:
+  magnitude: 0.36000000000000004
+  vec_implementation_ramp: null
+transformer: TFR:TRWW:INC_COMPLIANCE_SEPTIC
