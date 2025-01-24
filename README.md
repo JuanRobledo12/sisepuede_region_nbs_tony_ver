@@ -1,10 +1,25 @@
 # sisepuede_region_nbs
 Repository storing notebooks with region-specific information
 
-## Tutorials
+## Get Started
 
-1. To learn how to use the `TransformationUtils` classes to generate YAML files and strategies based on an Excel file, please refer to the [class_tutorial.ipynb](class_tutorial.ipynb) notebook.
-2. For a walkthrough on running a simulation and generating new YAML files and strategies, please refer to the [croatia_manager_wb.ipynb](croatia/croatia_manager_wb.ipynb) notebook.
+Create a conda env with python 3.11 (You can use any name)
+
+```
+conda create -n sisepuede python=3.11
+```
+Activate the env
+```
+conda activate sisepuede
+```
+Install the working version of the sisepuede package
+```
+pip install git+https://github.com/jcsyme/sisepuede.git@working_version
+```
+Install additional libraries
+```
+pip install -r requirements.txt
+```
 
 ## TODO
 
