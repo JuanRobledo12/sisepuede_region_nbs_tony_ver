@@ -1,0 +1,3 @@
+country_name: "georgia"
+ssp_input_file_name: "sisepuede_inputs_georgia.csv"
+ssp_transformation_cw: "ssp_georgia_transformation_cw.xlsx"
