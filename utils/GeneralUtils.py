@@ -87,55 +87,60 @@ class GeneralUtils:
         result = get_yaml_values(yaml_file_path)
 
         
-    def compare_dfs(self, df1, df2):
+    def compare_dfs(self, df_example, df_input):
         """
         Compares the columns of two pandas DataFrames and prints the differences.
         Parameters:
-        df1 (pandas.DataFrame): The first DataFrame to compare.
-        df2 (pandas.DataFrame): The second DataFrame to compare.
+        df_example (pandas.DataFrame): The SSP example DataFrame to compare.
+        df_input (pandas.DataFrame): Your input df DataFrame to compare.
         Returns:
         None
         Prints:
-        - Columns present in df1 but not in df2.
-        - Columns present in df2 but not in df1.
+        - Columns present in df_example but not in df_input.
+        - Columns present in df_input but not in df_example.
         """
 
-        # Assuming your DataFrames are df1 and df2
-        columns_df1 = set(df1.columns)
-        columns_df2 = set(df2.columns)
+        # Assuming your DataFrames are df_example and df_input
+        columns_df_example = set(df_example.columns)
+        columns_df_input = set(df_input.columns)
 
-        # Columns present in df1 but not in df2
-        diff_in_df1 = columns_df1 - columns_df2
+        # Columns present in df_example but not in df_input
+        diff_in_df_example = columns_df_example - columns_df_input
 
-        # Columns present in df2 but not in df1
-        diff_in_df2 = columns_df2 - columns_df1
+        # Columns present in df_input but not in df_example
+        diff_in_df_input = columns_df_input - columns_df_example
 
-        print("Columns in df1(example) but not in df2(yours):", diff_in_df1)
-        print("Columns in df2(yours) but not in df1(example):", diff_in_df2)
+        print("Columns in df_example but not in df_input:", diff_in_df_example)
+        print("Columns in df_input but not in df_example:", diff_in_df_input)
 
-    def add_missing_cols(self, df1, df2):
-        """
-        Add missing columns from one DataFrame to another.
-        This method identifies columns that are present in the first DataFrame (df1)
-        but not in the second DataFrame (df2), and adds those columns to df2 with 
-        their corresponding values from df1.
-        Parameters:
-        df1 (pd.DataFrame): The DataFrame containing the columns to be added.
-        df2 (pd.DataFrame): The DataFrame to which the missing columns will be added.
-        Returns:
-        pd.DataFrame: The updated DataFrame (df2) with the missing columns added.
-        """
-        # Identify columns in df1 but not in df2
-        columns_to_add = [col for col in df1.columns if col not in df2.columns]
+    def add_missing_cols(self, df_example, df_input):
+        
+        # Identify columns in df_example but not in df_input
+        columns_to_add = [col for col in df_example.columns if col not in df_input.columns]
 
         # Check if there are any columns to add
         if not columns_to_add:
             print("No missing columns to add.")
-            return df2
+            return df_input
 
         # Add missing columns to df2 with their values from df1
         for col in columns_to_add:
-            df2[col] = df1[col]
+            df_input[col] = df_example[col]
         
-        return df2
+        return df_input
+    
+    def remove_additional_cols(self, df_example, df_input):
+        
+        # Identify columns in df_input but not in df_example
+        columns_to_remove = [col for col in df_input.columns if col not in df_example.columns]
+
+        # Check if there are any columns to remove
+        if not columns_to_remove:
+            print("No additional columns to remove.")
+            return df_input
+
+        # Remove additional columns from df_input
+        df_input = df_input.drop(columns=columns_to_remove)
+        
+        return df_input
 
